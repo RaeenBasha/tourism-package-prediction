@@ -1,0 +1,30 @@
+name: Tourism Package Prediction - MLOps Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  data-preparation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify train and test datasets
+        run: |
+          echo "Checking prepared datasets..."
+          ls -lh data/train.csv
+          ls -lh data/test.csv
+
+      - name: Upload train and test datasets as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tourism-train-test-data
+          path: |
+            data/train.csv
+            data/test.csv
+          retention-days: 7
