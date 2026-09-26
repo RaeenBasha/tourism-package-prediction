@@ -74,6 +74,9 @@ jobs:
     needs: data-prep
     runs-on: ubuntu-latest
 
+    env:
+      MLFLOW_ALLOW_FILE_STORE: "true"
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
