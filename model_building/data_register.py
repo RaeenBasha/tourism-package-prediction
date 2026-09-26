@@ -1,9 +1,11 @@
-
-import pandas as pd
 import os
+import pandas as pd
+
+# Locate the project directory relative to this script
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DATA_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
+    PROJECT_DIR,
     "data",
     "tourism.csv"
 )
@@ -32,16 +34,26 @@ EXPECTED_COLUMNS = [
     "Unnamed: 0"
 ]
 
+print("Starting dataset registration and validation...")
+print(f"Dataset path: {DATA_PATH}")
+
+if not os.path.exists(DATA_PATH):
+    raise FileNotFoundError(
+        f"Dataset not found at: {DATA_PATH}"
+    )
+
 data = pd.read_csv(DATA_PATH)
 
+actual_columns = data.columns.tolist()
+
 missing_columns = [
-    col for col in EXPECTED_COLUMNS
-    if col not in data.columns
+    column for column in EXPECTED_COLUMNS
+    if column not in actual_columns
 ]
 
 unexpected_columns = [
-    col for col in data.columns
-    if col not in EXPECTED_COLUMNS
+    column for column in actual_columns
+    if column not in EXPECTED_COLUMNS
 ]
 
 validation_passed = (
@@ -49,30 +61,27 @@ validation_passed = (
     and len(unexpected_columns) == 0
 )
 
-print("========== DATASET VALIDATION ==========")
-print(f"Dataset path       : {DATA_PATH}")
-print(f"Validation status  : {"PASSED" if validation_passed else "FAILED"}")
-
-print("\n========== DATASET SUMMARY ==========")
-print(f"Rows               : {data.shape[0]}")
-print(f"Columns            : {data.shape[1]}")
-print(f"Duplicate rows     : {data.duplicated().sum()}")
-
-print("\n========== COLUMN VALIDATION ==========")
-print(f"Expected columns   : {len(EXPECTED_COLUMNS)}")
-print(f"Actual columns     : {len(data.columns)}")
-print(f"Missing columns    : {missing_columns if missing_columns else 'None'}")
-print(f"Unexpected columns : {unexpected_columns if unexpected_columns else 'None'}")
-
-print("\n========== MISSING VALUE SUMMARY ==========")
+print(f"Rows: {data.shape[0]}")
+print(f"Columns: {data.shape[1]}")
+print(f"Duplicate rows: {data.duplicated().sum()}")
+print(f"Expected columns: {len(EXPECTED_COLUMNS)}")
+print(f"Actual columns: {len(actual_columns)}")
+print(f"Missing columns: {missing_columns if missing_columns else 'None'}")
+print(f"Unexpected columns: {unexpected_columns if unexpected_columns else 'None'}")
 print(f"Total missing values: {data.isnull().sum().sum()}")
 
-print("\n========== TARGET DISTRIBUTION ==========")
+print("\nProdTaken distribution:")
 print(data["ProdTaken"].value_counts())
-print("\nTarget percentage:")
+
+print("\nProdTaken percentage:")
 print((data["ProdTaken"].value_counts(normalize=True) * 100).round(2))
 
-if not validation_passed:
-    raise ValueError("Dataset validation failed. Please review the column differences above.")
+if validation_passed:
+    print("\nValidation status: PASSED")
+else:
+    print("\nValidation status: FAILED")
+    raise ValueError(
+        "Dataset validation failed. Please review the missing or unexpected columns."
+    )
 
-print("\nDataset validation completed successfully.")
+print("Dataset registration validation completed successfully.")
